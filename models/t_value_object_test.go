@@ -44,3 +44,14 @@ func TestJSONUnmarshal(t *testing.T) {
 		})
 	}
 }
+
+func TestValueObject_Clean(t1 *testing.T) {
+	var vo models.ValueObject[int]
+
+	vo.Set(1)
+	vo.Clean()
+
+	value, ok := vo.Get()
+	assert.Equal(t1, 0, value)
+	assert.False(t1, ok)
+}

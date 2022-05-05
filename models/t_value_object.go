@@ -16,6 +16,12 @@ func (t *ValueObject[T]) Set(value T) {
 	t.notEmpty = true
 }
 
+func (t *ValueObject[T]) Clean() {
+	var noop T
+	t.value = noop
+	t.notEmpty = false
+}
+
 func (t *ValueObject[T]) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &t.value); err != nil {
 		return err
