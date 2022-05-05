@@ -17,7 +17,10 @@ func (t *ValueObject[T]) Set(value T) {
 }
 
 func (t *ValueObject[T]) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &t.value); err != nil {
+		return err
+	}
+
 	t.notEmpty = true
-	err := json.Unmarshal(data, &t.value)
-	return err
+	return nil
 }
