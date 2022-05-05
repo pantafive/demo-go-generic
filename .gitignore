@@ -1,0 +1,7 @@
+.*
+
+!.github
+
+!.gitignore
+!.golangci.yml
+!.pre-commit-config.yaml
