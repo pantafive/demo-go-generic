@@ -55,3 +55,25 @@ func TestValueObject_Clean(t1 *testing.T) {
 	assert.Equal(t1, 0, value)
 	assert.False(t1, ok)
 }
+
+func TestValueObject_Equals(t1 *testing.T) {
+	tests := []struct {
+		name        string
+		left, right int
+		isEqual     bool
+	}{
+		{"equal", 1, 1, true},
+		{"equal", 1, 2, false},
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			left := models.ValueObject[int]{}
+			left.Set(tt.left)
+			right := models.ValueObject[int]{}
+			right.Set(tt.right)
+
+			equal := left == right
+			assert.Equal(t1, tt.isEqual, equal)
+		})
+	}
+}

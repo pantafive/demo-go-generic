@@ -2,7 +2,7 @@ package models
 
 import "encoding/json"
 
-type ValueObject[T any] struct {
+type ValueObject[T comparable] struct {
 	value    T
 	notEmpty bool
 }
@@ -15,6 +15,13 @@ func (t *ValueObject[T]) Set(value T) {
 	t.value = value
 	t.notEmpty = true
 }
+
+//func (t *ValueObject[T]) Equals(other ValueObject[T]) bool {
+//	if t.value != other.value || t.notEmpty != other.notEmpty {
+//		return false
+//	}
+//	return true
+//}
 
 func (t *ValueObject[T]) Clean() {
 	var noop T
