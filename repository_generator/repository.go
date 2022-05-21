@@ -19,42 +19,41 @@ CREATE TABLE user
   age  INTEGER NOT NULL
 );`
 
-type Iterator[T any] struct {
-	iterate func() (T, error)
-}
-
-func (i *Iterator[T]) Next() (T, error) {
-	val, err := i.iterate()
-	return val, err
-}
-
 type Repository struct {
 	*sqlx.DB
 }
 
-func (r Repository) ReadUsers() (*Iterator[*User], error) {
-	rows, err := r.Queryx("SELECT id, name, age FROM user;")
-	if err != nil {
-		return nil, err
-	}
+type Iteration[T any] struct {
+	Value T
+	Err   error
+}
 
-	i := &Iterator[*User]{}
+func (r Repository) ReadUsers() chan Iteration[User] {
+	c := make(chan Iteration[User], 1)
 
-	i.iterate = func() (*User, error) {
-		user := User{}
-
-		if rows.Next() {
-			return &user, scanAndCloseOnError(rows, &user)
+	go func() {
+		rows, err := r.Queryx("SELECT id, name, age FROM user;")
+		if err != nil {
+			c <- Iteration[User]{Err: err}
+			close(c)
 		}
 
-		if err := rows.Close(); err != nil {
-			return nil, err
+		defer func(rows *sqlx.Rows) {
+			err := rows.Close()
+			if err != nil {
+				c <- Iteration[User]{Err: err}
+			}
+			close(c)
+		}(rows)
+
+		for rows.Next() {
+			var user User
+			err := scanAndCloseOnError(rows, &user)
+			c <- Iteration[User]{Err: err, Value: user}
 		}
+	}()
 
-		return nil, nil //nolint:nilnil
-	}
-
-	return i, nil
+	return c
 }
 
 func scanAndCloseOnError[T any](rows *sqlx.Rows, v T) error {

@@ -30,12 +30,14 @@ func TestMain(m *testing.M) {
 }
 
 func TestRepository_ReadUsersAge(t *testing.T) {
-	repository := &Repository{testDB}
-	users, err := repository.ReadUsers()
-	require.NoError(t, err)
+	repository := &Repository{DB: testDB}
 
-	for user, err := users.Next(); user != nil || err != nil; user, err = users.Next() {
-		require.NoError(t, err)
+	i := 0
+	for iteration := range repository.ReadUsers() {
+		i++
+		require.NoError(t, iteration.Err)
+		user := iteration.Value
 		assert.GreaterOrEqual(t, user.Age, uint(18))
 	}
+	assert.Equal(t, 3, i)
 }
